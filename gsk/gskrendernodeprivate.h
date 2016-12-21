@@ -13,8 +13,7 @@ typedef struct _GskRenderNodeClass GskRenderNodeClass;
 struct _GskRenderNode
 {
   const GskRenderNodeClass *node_class;
-
-  volatile int ref_count;
+  GskRenderTree *tree;
 
   /* Use for debugging */
   char *name;
@@ -31,13 +30,16 @@ struct _GskRenderNodeClass
   GskRenderNodeType node_type;
   gsize struct_size;
   const char *type_name;
-  void (* finalize) (GskRenderNode *node);
   void (* draw) (GskRenderNode *node,
                  cairo_t       *cr);
 };
 
-GskRenderNode *gsk_render_node_new (const GskRenderNodeClass *node_class, gsize extra_size);
+GskRenderNode *gsk_render_tree_new_node (GskRenderTree  *tree, const GskRenderNodeClass *node_class, gsize extra_size);
+gpointer gsk_render_tree_allocate (GskRenderTree *self, gsize n_bytes, gsize align_size);
+void gsk_render_tree_add_cleanup (GskRenderTree  *tree, GDestroyNotify notify, gpointer data);
+GskRenderNode *gsk_render_tree_ref_foreign (GskRenderTree  *tree, GskRenderNode *node);
 
+GskRenderTree *gsk_render_node_get_tree (GskRenderNode *self);
 void gsk_render_node_get_bounds (GskRenderNode   *node,
                                  graphene_rect_t *frame);
 double gsk_opacity_node_get_opacity (GskRenderNode *node);

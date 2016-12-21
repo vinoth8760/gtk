@@ -1932,12 +1932,11 @@ gtk_stack_snapshot_crossfade (GtkWidget   *widget,
       gtk_snapshot_push_transform (snapshot, &identity, "CrossFadeStart");
       gtk_snapshot_append_node (snapshot, priv->last_visible_node);
       start_node = gtk_snapshot_pop (snapshot);
-      node = gsk_cross_fade_node_new (start_node, end_node, progress);
-      gsk_render_node_unref (start_node);
+      node = gsk_cross_fade_node_new (gtk_snapshot_get_tree (snapshot), start_node, end_node, progress);
     }
   else
     {
-      node = gsk_opacity_node_new (end_node, 1.0 - progress);
+      node = gsk_opacity_node_new (gtk_snapshot_get_tree (snapshot), end_node, 1.0 - progress);
     }
 
   name = g_strdup_printf ("CrossFade<%g>", progress);
@@ -1945,9 +1944,6 @@ gtk_stack_snapshot_crossfade (GtkWidget   *widget,
   g_free (name);
 
   gtk_snapshot_append_node (snapshot, node);
-
-  gsk_render_node_unref (node);
-  gsk_render_node_unref (end_node);
 }
 
 static void
