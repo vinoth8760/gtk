@@ -183,7 +183,7 @@ gdk_vulkan_context_check_swapchain (GdkVulkanContext  *context,
   VkSwapchainKHR new_swapchain;
   VkResult res;
   VkDevice device;
-  guint i;
+  guint i, min_img_count;
 
   if (gdk_window_get_width (window) == priv->swapchain_width &&
       gdk_window_get_height (window) == priv->swapchain_height)
@@ -227,13 +227,15 @@ gdk_vulkan_context_check_swapchain (GdkVulkanContext  *context,
       capabilities.currentExtent.height = gdk_window_get_height (window) * gdk_window_get_scale_factor (window);
     }
 
+  min_img_count = CLAMP (2, capabilities.minImageCount, capabilities.maxImageCount ? capabilities.maxImageCount : G_MAXUINT32);
+
   res = GDK_VK_CHECK (vkCreateSwapchainKHR, device,
                                             &(VkSwapchainCreateInfoKHR) {
                                                 .sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR,
                                                 .pNext = NULL,
                                                 .flags = 0,
                                                 .surface = priv->surface,
-                                                .minImageCount = 2,
+                                                .minImageCount = min_img_count,
                                                 .imageFormat = priv->image_format.format,
                                                 .imageColorSpace = priv->image_format.colorSpace,
                                                 .imageExtent = capabilities.currentExtent,
